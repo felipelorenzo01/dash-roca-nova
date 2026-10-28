@@ -453,7 +453,7 @@ function rays(){ var s='', N=44; for (var i=0;i<N;i++){ var len=i%2?22:36; s+='<
 function status(){
   var d=new Date(S.D.updatedAt);
   $("chip").className="chip live"; $("chip").textContent="Dados da Meta";
-  $("meta").innerHTML="Atualizado em <b>"+String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" às "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+"</b> · atualiza todo dia às 7h e às 17h";
+  $("meta").innerHTML="Atualizado em <b>"+String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" às "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+"</b> · atualiza todo dia às 7h";
 }
 
 /* ---------- eventos ---------- */

@@ -1,6 +1,6 @@
 # Como atualizar os dados do painel
 
-Este roteiro é seguido pela tarefa agendada do Claude, todo dia às 7h e às 17h (horário de Brasília). Ele também serve pra rodar à mão.
+Este roteiro é seguido pela tarefa agendada do Claude, todo dia às 7h (horário de Brasília). Ele também serve pra rodar à mão.
 
 ## 1. Buscar os dados na Meta
 
@@ -18,6 +18,11 @@ Faça as três chamadas abaixo. Salve o campo `ad_entities` de cada resposta, qu
 | `raw/ads.json` | ad | "1" | — | id, name, campaign_name, adset_name, amount_spent, impressions, link_click, results, instagram_profile_follow_v2, video_play_actions |
 
 Use `limit: 1000` nas três.
+
+**Atenção na chamada `raw/ads.json`:** com 90 dias por dia e muitos anúncios, a Meta corta a resposta sem avisar (as linhas vêm zeradas a partir de um ponto e praças inteiras somem). Por isso:
+- Faça primeiro `raw/adsets.json`. Na chamada por anúncio, use `since` = o primeiro dia com investimento em `raw/adsets.json` (não os 90 dias inteiros).
+- Se esse período passar de 14 dias, quebre em janelas de no máximo 14 dias e junte as listas num só `raw/ads.json`.
+- Depois de rodar o script, se aparecer "ATENÇÃO: criativos somam…", refaça `raw/ads.json` em janelas de 7 dias.
 
 ## 2. Prévias dos criativos
 

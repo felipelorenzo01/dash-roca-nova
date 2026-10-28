@@ -1,9 +1,10 @@
 {
-  "account": { "id": "1031511192155613", "name": "CA 01 - Roça Nova" },
+  "account": {"id": "1031511192155613", "name": "CA 01 - Roça Nova"},
   "cities": [
     { "key": "bh", "label": "BH e Entorno", "uf": "MG", "keywords": ["bh e entorno", "belo horizonte", "bh"] },
     { "key": "spcap", "label": "SP Capital", "uf": "SP", "keywords": ["sp capital", "sao paulo capital"] },
     { "key": "rj", "label": "RJ Capital", "uf": "RJ", "keywords": ["rj capital", "rio de janeiro", "rj"] },
-    { "key": "spint", "label": "SP Interior", "uf": "SP", "keywords": ["sp interior", "interior de sp", "interior sp"] }
+    { "key": "spint", "label": "SP Interior", "uf": "SP", "keywords": ["sp interior", "interior de sp", "interior sp"] },
+    { "key": "bsb", "label": "Brasília", "uf": "DF", "keywords": ["brasilia", "bsb", "distrito federal"] }
   ]
 }

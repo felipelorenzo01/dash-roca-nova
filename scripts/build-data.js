@@ -80,5 +80,10 @@ fs.writeFileSync("data.json", JSON.stringify(out));
 const tot = daily.reduce((t, r) => { t.s += r[2]; t.f += r[6]; t.v += r[5]; return t; }, { s: 0, f: 0, v: 0 });
 console.log(`data.json: ${daily.length} linhas por dia, ${demo.length} de público, ${ads.length} de criativos, ${Object.keys(creatives).length} criativos.`);
 console.log(`Período ${out.firstDay} a ${out.lastDay} · investimento R$ ${tot.s.toFixed(2)} · ${tot.v} visitas · ${tot.f} seguidores.`);
+// Confere se a leitura por anúncio veio completa (a Meta corta respostas grandes sem avisar)
+const spAds = ads.reduce((t, r) => t + r[3], 0);
+if (tot.s > 0 && Math.abs(spAds - tot.s) > Math.max(1, tot.s * 0.02)) {
+  console.log(`ATENÇÃO: criativos somam R$ ${spAds.toFixed(2)} e conjuntos R$ ${tot.s.toFixed(2)}. Refaça raw/ads.json em janelas menores (veja UPDATE.md).`);
+}
 const semCidade = adsets.filter((a) => !a.city).map((a) => a.name);
 if (semCidade.length) console.log("Conjuntos sem praça (entram só na visão geral): " + semCidade.join(" | "));

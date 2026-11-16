@@ -144,7 +144,7 @@ const COLS = ["reach", "views", "interactions", "follows", "engaged", "likes", "
     try { await run(list); } catch (e) { if (e.fatal) throw e; for (const k of list) { try { await run([k]); } catch (e2) { if (e2.fatal) throw e2; } } }
     // miniatura (as URLs da Meta expiram, por isso guardamos uma cópia)
     let thumb = null;
-    const src = m.thumbnail_url || (m.media_type === "IMAGE" ? m.media_url : null);
+    const src = m.thumbnail_url || (m.media_type === "IMAGE" || m.media_type === "CAROUSEL_ALBUM" ? m.media_url : null);
     if (src) {
       const f = path.join(THUMBS, m.id + ".jpg");
       if (!fs.existsSync(f)) { try { const r = await fetch(src); if (r.ok) fs.writeFileSync(f, Buffer.from(await r.arrayBuffer())); } catch (e) {} }

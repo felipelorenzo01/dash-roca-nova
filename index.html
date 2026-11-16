@@ -563,7 +563,7 @@ function setView(v){
 function viewsUI(){ document.querySelectorAll("#views button").forEach(function(b){ b.setAttribute("aria-pressed",String(b.dataset.v===S.view)); }); }
 function rays(){ var s='', N=44; for (var i=0;i<N;i++){ var len=i%2?22:36; s+='<rect x="196" y="'+(8+(36-len))+'" width="8" height="'+len+'" rx="2" transform="rotate('+(i/N*360).toFixed(1)+' 200 200)"/>'; } $("rays").innerHTML=s; }
 function status(){
-  var tg=document.querySelector(".hero .tag"), bd=document.querySelector(".band span:last-child");
+  var tg=document.querySelector(".hero .tag"), bd=document.querySelector(".band > span:last-child");
   if (tg) tg.innerHTML=S.view==="org"?"Alcance, visualizações, interações e <em>seguidores novos</em> do Instagram.":"Visitas ao perfil e <em>seguidores novos</em>, praça por praça.";
   if (bd) bd.textContent=S.view==="org"?"Crescimento orgânico · Instagram":"Campanhas · Meta Ads";
   if (S.view==="org"){

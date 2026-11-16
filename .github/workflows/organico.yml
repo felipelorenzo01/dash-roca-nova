@@ -1,0 +1,36 @@
+name: Atualizar números orgânicos
+
+on:
+  schedule:
+    - cron: "40 9 * * *"   # 06:40 de Brasília, antes da atualização das 7h
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: organico
+  cancel-in-progress: false
+
+jobs:
+  organico:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Buscar dados do Instagram
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
+        run: node scripts/fetch-organic.js
+      - name: Publicar
+        run: |
+          git config user.name "Felipe Lorenzo"
+          git config user.email "felipe.lorenzo01@gmail.com"
+          git add organic.json thumbs/org
+          if git diff --cached --quiet; then echo "Sem mudanças"; exit 0; fi
+          git commit -m "Atualiza orgânico $(TZ=America/Bahia date +%d/%m\ %H:%M)"
+          git pull --rebase origin main
+          git push origin HEAD:main

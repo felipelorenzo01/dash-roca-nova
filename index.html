@@ -219,6 +219,20 @@ tbody tr:hover{background:var(--soil-3)}
 
 .foot{margin-top:52px;padding-top:18px;border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--f-data);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--dust)}
 .foot img{height:54px;width:auto}
+
+/* seção: anúncios x orgânico */
+.views{display:flex;gap:10px;margin-top:14px}
+.views button{flex:1 1 0;display:grid;gap:2px;text-align:left;font-family:var(--f-show);font-weight:900;font-size:clamp(20px,2.4vw,26px);line-height:1;padding:12px 16px 10px;border:2px solid var(--line);border-radius:14px;background:var(--soil-2);color:var(--cream)}
+.views button small{font-family:var(--f-data);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dust)}
+.views button:hover{border-color:var(--mustard)}
+.views button[aria-pressed="true"]{background:var(--chili);border-color:var(--chili)}
+.views button[aria-pressed="true"] small{color:#F6CFC4}
+.orgp{display:flex;gap:10px;align-items:center;text-align:left;min-width:230px;white-space:normal}
+.orgp img,.orgp .ph{width:44px;height:56px;flex:none;object-fit:cover;border-radius:6px;background:var(--soil-3)}
+.orgp a{color:var(--cream);text-decoration:none;line-height:1.25}
+.orgp a:hover{color:var(--mustard)}
+.orgp small{display:block;color:var(--dust);font-size:13px}
+.c-bar.org{fill:var(--chili)}
 </style></head><body>
 
 <div class="wrap">
@@ -239,6 +253,7 @@ tbody tr:hover{background:var(--soil-3)}
     <span id="chip" class="chip demo">Carregando</span>
     <span id="meta" class="meta"></span>
   </div>
+  <nav class="views" id="views" aria-label="Seção do painel"><button type="button" data-v="ads" aria-pressed="true">Anúncios<small>Meta Ads · pago</small></button><button type="button" data-v="org" aria-pressed="false">Orgânico<small>Instagram · crescimento</small></button></nav>
   <section class="period" id="period" aria-label="Período de análise"></section>
 
   <nav class="tabs" role="tablist" aria-label="Praças" id="tabs"></nav>
@@ -249,7 +264,7 @@ tbody tr:hover{background:var(--soil-3)}
 <script>
 (function(){
 "use strict";
-var S = {D:null, active:"all", metric:"follows", preset:"all", from:null, to:null, cmp:"none", cfrom:null, cto:null};
+var S = {D:null, O:null, view:"ads", ometric:"reach", osort:"reach", active:"all", metric:"follows", preset:"all", from:null, to:null, cmp:"none", cfrom:null, cto:null};
 var $ = function(id){ return document.getElementById(id); };
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 var nf0=new Intl.NumberFormat("pt-BR",{maximumFractionDigits:0}), nf1=new Intl.NumberFormat("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1});
@@ -301,8 +316,9 @@ function agg(key, from, to){
 /* ---------- períodos ---------- */
 var PRESETS=[["7","7 dias"],["14","14 dias"],["30","30 dias"],["month","Este mês"],["lastmonth","Mês passado"],["all","Tudo"],["custom","Personalizado"]];
 var CMPS=[["none","Não comparar"],["prev","Período anterior"],["lastmonth","Mesmo período no mês anterior"],["custom","Personalizado"]];
+function base(){ return (S.view==="org"&&S.O)?S.O:S.D; }
 function range(){
-  var last=S.D.lastDay, first=S.D.firstDay||last, f, t=last;
+  var B=base(), last=B.lastDay, first=B.firstDay||last, f, t=last;
   if (S.preset==="7"||S.preset==="14"||S.preset==="30") f=addD(last,-(+S.preset-1));
   else if (S.preset==="month") f=last.slice(0,8)+"01";
   else if (S.preset==="lastmonth"){ var d=pd(last.slice(0,8)+"01"); d.setDate(0); t=iso(d); f=t.slice(0,8)+"01"; }
@@ -317,10 +333,10 @@ function cmpRange(r){
   if (S.cmp==="lastmonth"){ var a=pd(r.from), b=pd(r.to); a.setMonth(a.getMonth()-1); b.setMonth(b.getMonth()-1); return {from:iso(a),to:iso(b)}; }
   var f=S.cfrom||addD(r.from,-len), t=S.cto||addD(r.from,-1); if (f>t){ var x=f; f=t; t=x; } return {from:f,to:t};
 }
-function save(){ lsSet("rn_period",{preset:S.preset,from:S.from,to:S.to,cmp:S.cmp,cfrom:S.cfrom,cto:S.cto,active:S.active}); }
+function save(){ lsSet("rn_period",{view:S.view,preset:S.preset,from:S.from,to:S.to,cmp:S.cmp,cfrom:S.cfrom,cto:S.cto,active:S.active}); }
 
 function renderPeriod(){
-  var r=range(), c=cmpRange(r), min=S.D.firstDay?addD(S.D.firstDay,-90):"", max=S.D.lastDay;
+  var r=range(), c=cmpRange(r), min=base().firstDay?addD(base().firstDay,-90):"", max=base().lastDay;
   var h='<div class="pgroup"><span class="plabel">Período</span><div class="chips" role="group" aria-label="Período">'+
     PRESETS.map(function(p){ return '<button type="button" class="pc" data-p="'+p[0]+'" aria-pressed="'+(S.preset===p[0])+'">'+p[1]+'</button>'; }).join("")+'</div>';
   if (S.preset==="custom") h+='<div class="dates"><label>De <input type="date" id="fFrom" min="'+min+'" max="'+max+'" value="'+r.from+'"></label><label>até <input type="date" id="fTo" min="'+min+'" max="'+max+'" value="'+r.to+'"></label></div>';
@@ -346,6 +362,8 @@ function renderTabs(r){
   }).join("");
 }
 function render(){
+  if (S.view==="org"){ renderOrg(); return; }
+  $("tabs").style.display="";
   var r=range(), cr=cmpRange(r), c=scopeBy(S.active);
   renderPeriod(); renderTabs(r);
   var d=agg(c.key,r.from,r.to), p=cr?agg(c.key,cr.from,cr.to):null, t=d.totals, pt=p&&p.totals;
@@ -449,8 +467,112 @@ function drawDaily(d,p){
     r.addEventListener("mouseenter",show); r.addEventListener("click",show); r.addEventListener("mouseleave",function(){ tip.hidden=true; });
   });
 }
+
+/* ---------- orgânico (Instagram) ---------- */
+var OCOLS=["reach","views","interactions","follows","engaged","likes","comments","shares","saves","visits","linkTaps"];
+function oblank(){ var o={}; OCOLS.forEach(function(c){ o[c]=0; }); return o; }
+function oagg(from,to){
+  var O=S.O, ci={}; (O.cols||OCOLS).forEach(function(c,i){ ci[c]=i+1; });
+  var t=oblank(), by={};
+  O.daily.forEach(function(r){ if (r[0]<from||r[0]>to) return; var x=Object.assign({d:r[0]},oblank()); OCOLS.forEach(function(c){ var v=n(r[ci[c]]); x[c]=v; t[c]+=v; }); by[r[0]]=x; });
+  var days=[]; for (var d=from; d<=to; d=addD(d,1)) days.push(by[d]||Object.assign({d:d},oblank()));
+  var posts=(O.posts||[]).filter(function(p){ return p.date>=from&&p.date<=to; });
+  return {t:t,days:days,posts:posts};
+}
+function orgEmpty(msg){
+  $("period").innerHTML=""; $("tabs").style.display="none";
+  $("panel").innerHTML='<div class="sec"><div class="empty"><b>Orgânico ainda sem dados</b>'+msg+'</div></div>';
+}
+function renderOrg(){
+  $("tabs").style.display="none";
+  if (!S.O){ orgEmpty(S.OERR?'Os números do Instagram ainda não foram gerados. A atualização automática roda todo dia de manhã.':'Carregando…'); return; }
+  var r=range(), cr=cmpRange(r), O=S.O;
+  renderPeriod();
+  var d=oagg(r.from,r.to), p=cr?oagg(cr.from,cr.to):null, t=d.t, pt=p&&p.t, P=function(k){ return pt?pt[k]:null; };
+  var head='<div class="phead"><div><h2>Instagram <span>orgânico</span></h2><div class="sub">'+(O.account?'@'+esc(O.account.username)+' · <b>'+nf0.format(O.account.followers)+'</b> seguidores hoje · ':'')+ddmm(r.from)+' a '+ddmm(r.to)+(cr?' · comparado a '+ddmm(cr.from)+' a '+ddmm(cr.to):'')+'</div></div></div>';
+  if (!d.days.some(function(x){ return x.reach>0||x.views>0; })){ $("panel").innerHTML=head+'<div class="sec"><div class="empty"><b>Sem dados nesse período</b>Escolha outro período acima. Os números orgânicos começam em '+ddmm(O.firstDay)+'.</div></div>'; return; }
+  var ux=(!cr||true)&&O.uniqueReach&&r.to===O.lastDay&&S.preset!=="custom"?O.uniqueReach[S.preset]:null;
+  var reachV=ux!=null?ux:t.reach, reachS=ux!=null?"contas únicas no período":"soma do alcance de cada dia";
+  var kp=[
+    {k:"Alcance", v:fN(reachV), s:reachS, dl:delta(t.reach,P("reach"),"up"), cls:"gold"},
+    {k:"Visualizações", v:fN(t.views), s:"posts, reels e stories", dl:delta(t.views,P("views"),"up"), cls:"hot"},
+    {k:"Interações", v:fN(t.interactions), s:fN(t.likes)+" curtidas · "+fN(t.comments)+" comentários", dl:delta(t.interactions,P("interactions"),"up"), cls:"gold"},
+    {k:"Novos seguidores", v:nf0.format(t.follows), s:"entradas menos saídas no período", dl:delta(t.follows,P("follows"),"up"), cls:"hot"},
+    {k:"Visitas ao perfil", v:fN(t.visits), s:t.visits>0?fP(pct(Math.max(0,t.follows),t.visits))+" viraram seguidores":"—", dl:delta(t.visits,P("visits"),"up")},
+    {k:"Engajamento", v:t.reach>0?fP(pct(t.interactions,t.reach)):"—", s:"Interações ÷ alcance (diário)", dl:pt?delta(pct(t.interactions,t.reach),pct(pt.interactions,pt.reach),"up"):""},
+    {k:"Compartilhados", v:fN(t.shares), s:"o que mais espalha a banda", dl:delta(t.shares,P("shares"),"up")},
+    {k:"Salvamentos", v:fN(t.saves), s:"quem quer rever depois", dl:delta(t.saves,P("saves"),"up")}
+  ];
+  var h=head+'<div class="sec"><div class="kpis">'+kp.map(function(k){
+    return '<div class="kpi '+(k.cls||"")+'"><span class="k">'+k.k+'</span><span class="v">'+k.v+'</span><span class="s">'+esc(k.s)+'</span>'+(k.dl?'<span class="dlw">'+k.dl+(pt?' <small>vs comparação</small>':'')+'</span>':'')+'</div>';
+  }).join("")+'</div></div>';
+  var MET=[["reach","Alcance"],["views","Visualizações"],["interactions","Interações"]], ml=MET.filter(function(m){ return m[0]===S.ometric; })[0][1];
+  h+='<div class="sec grid2"><div><div class="h3"><h3>Dia a dia</h3><div class="seg" role="group" aria-label="Métrica do gráfico">'+MET.map(function(m){ return '<button type="button" data-om="'+m[0]+'" aria-pressed="'+(S.ometric===m[0])+'">'+m[1]+'</button>'; }).join("")+'</div></div><div class="box" id="orgBox"><div class="legend"><span><i style="background:var(--chili)"></i>'+ml+' (barras)</span><span><i style="background:var(--mustard)"></i>Novos seguidores (linha)</span></div><div id="orgChart"></div><div class="tip" id="orgTip" hidden></div></div></div>';
+  var inter=[["Curtidas",t.likes],["Comentários",t.comments],["Compartilhados",t.shares],["Salvamentos",t.saves]], im=Math.max.apply(null,inter.map(function(x){return x[1];}))||1;
+  h+='<div><div class="h3"><h3>Como interagem</h3><span class="hint">Barra = peso de cada tipo</span></div><div class="funnel">'+inter.map(function(x){ return '<div class="fs"><span class="l">'+x[0]+'</span><span class="tr"><span class="fi" style="display:block;width:'+Math.max(2,x[1]/im*100)+'%"></span></span><span class="n">'+fN(x[1])+'<small>'+(t.interactions>0?fP(pct(x[1],t.interactions)):"—")+'</small></span></div>'; }).join("")+'</div>';
+  if (t.follows>0 && t.reach>0) h+='<div class="insight">Foram <b>'+nf0.format(t.follows)+' novos seguidores</b> em '+span(r.from,r.to)+' dias, com média de <b>'+nf0.format(t.follows/span(r.from,r.to))+' por dia</b>.</div>';
+  h+='</div></div>';
+  var SORT=[["reach","Alcance"],["views","Visualizações"],["interactions","Interações"]];
+  var top=d.posts.slice().sort(function(a,b){ return n(b[S.osort])-n(a[S.osort]); }).slice(0,10);
+  h+='<div class="sec"><div class="h3"><h3>Melhores posts</h3><div class="seg" role="group" aria-label="Ordenar posts">'+SORT.map(function(m){ return '<button type="button" data-os="'+m[0]+'" aria-pressed="'+(S.osort===m[0])+'">'+m[1]+'</button>'; }).join("")+'</div></div>';
+  if (!top.length) h+='<div class="empty"><b>Sem posts no período</b>Nenhum post ou reel publicado entre '+ddmm(r.from)+' e '+ddmm(r.to)+'.</div>';
+  else h+='<div class="tablebox"><table><thead><tr><th>Post</th><th>Formato</th><th>Alcance</th><th>Views</th><th>Interações</th><th>Compart.</th><th>Salvos</th></tr></thead><tbody>'+top.map(function(x){
+    var th=x.thumb?'<img src="'+esc(x.thumb)+'" alt="" loading="lazy">':'<span class="ph"></span>';
+    return '<tr><td><div class="orgp">'+th+'<div><a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.caption||"(sem legenda)")+'</a><small>'+ddmm(x.date)+'</small></div></div></td><td>'+esc(x.type)+'</td><td>'+fN(x.reach)+'</td><td>'+fN(x.views)+'</td><td>'+fN(x.interactions)+'</td><td>'+fN(x.shares)+'</td><td>'+fN(x.saves)+'</td></tr>';
+  }).join("")+'</tbody></table></div>';
+  h+='</div>';
+  var fm={}; d.posts.forEach(function(x){ var f=fm[x.type]||(fm[x.type]={type:x.type,n:0,reach:0,views:0,inter:0}); f.n++; f.reach+=n(x.reach); f.views+=n(x.views); f.inter+=n(x.interactions); });
+  var fl=Object.keys(fm).map(function(k){ return fm[k]; }).sort(function(a,b){ return per(b.reach,b.n)-per(a.reach,a.n); });
+  if (fl.length) h+='<div class="sec"><div class="h3"><h3>Por formato</h3><span class="hint">Média por post publicado no período</span></div><div class="tablebox"><table><thead><tr><th>Formato</th><th>Posts</th><th>Alcance médio</th><th>Views médias</th><th>Interações médias</th></tr></thead><tbody>'+fl.map(function(f){ return '<tr><td class="pl">'+esc(f.type)+'</td><td>'+f.n+'</td><td>'+fN(per(f.reach,f.n))+'</td><td>'+fN(per(f.views,f.n))+'</td><td>'+fN(per(f.inter,f.n))+'</td></tr>'; }).join("")+'</tbody></table></div></div>';
+  $("panel").innerHTML=h;
+  drawOrg(d,p);
+}
+function drawOrg(d,p){
+  var box=$("orgChart"); if (!box) return;
+  var key=S.ometric, W=Math.max(300,box.clientWidth), H=W<520?230:270, pl=W<520?44:54, pr=36, pt=14, pb=30;
+  var days=d.days, nD=days.length, iw=W-pl-pr, ih=H-pt-pb, pd2=p?p.days:[];
+  var mS=4*step4(Math.max.apply(null,days.map(function(x){return x[key];}))||1);
+  var fMax=Math.max.apply(null,days.map(function(x){return x.follows;}).concat(pd2.slice(0,nD).map(function(x){return x.follows;})).concat([1])), fStep=Math.max(1,Math.ceil(step4(fMax))), mF=fStep*4;
+  var bw=iw/nD, gap=Math.min(5,bw*.28), s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico diário do Instagram">';
+  for (var g=0; g<=4; g++){ var y=pt+ih-ih*g/4; s+='<line class="c-grid" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'"/><text x="'+(pl-6)+'" y="'+(y+4)+'" text-anchor="end">'+fN(mS*g/4)+'</text><text x="'+(W-pr+6)+'" y="'+(y+4)+'">'+nf0.format(mF*g/4)+'</text>'; }
+  days.forEach(function(x,i){ var hh=x[key]/mS*ih; s+='<rect class="c-bar" rx="3" x="'+(pl+i*bw+gap/2).toFixed(1)+'" y="'+(pt+ih-hh).toFixed(1)+'" width="'+Math.max(1,bw-gap).toFixed(1)+'" height="'+hh.toFixed(1)+'"/>'; });
+  var X=function(i){ return pl+i*bw+bw/2; }, Y=function(v){ return pt+ih-Math.max(0,v)/mF*ih; };
+  if (pd2.length) s+='<polyline class="c-cmp" points="'+pd2.slice(0,nD).map(function(x,i){ return X(i).toFixed(1)+","+Y(x.follows).toFixed(1); }).join(" ")+'"/>';
+  s+='<polyline class="c-line" points="'+days.map(function(x,i){ return X(i).toFixed(1)+","+Y(x.follows).toFixed(1); }).join(" ")+'"/>';
+  if (nD<=45) days.forEach(function(x,i){ s+='<circle class="c-dot" cx="'+X(i).toFixed(1)+'" cy="'+Y(x.follows).toFixed(1)+'" r="'+(nD>20?3:4.5)+'"/>'; });
+  var st=Math.max(1,Math.ceil(nD/(W<520?5:9)));
+  days.forEach(function(x,i){ if (i%st===0) s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+ddmm(x.d)+'</text>'; });
+  days.forEach(function(x,i){ s+='<rect class="c-hit" data-i="'+i+'" x="'+(pl+i*bw).toFixed(1)+'" y="'+pt+'" width="'+bw.toFixed(1)+'" height="'+ih+'"/>'; });
+  box.innerHTML=s+'</svg>';
+  var tip=$("orgTip"), wrap=$("orgBox");
+  box.querySelectorAll(".c-hit").forEach(function(r){
+    function show(){ var i=+r.dataset.i, x=days[i], q=pd2[i], b=r.getBoundingClientRect(), wb=wrap.getBoundingClientRect();
+      tip.innerHTML='<b>'+ddmm(x.d)+'</b><br>'+nf0.format(x.reach)+' alcance · '+nf0.format(x.views)+' views<br>'+nf0.format(x.interactions)+' interações · '+nf0.format(x.follows)+' novos seguidores'+(q?'<br><span style="opacity:.7">'+ddmm(q.d)+': '+nf0.format(q[key])+' / '+nf0.format(q.follows)+' seg.</span>':'');
+      tip.hidden=false; var l=b.left-wb.left+b.width/2; tip.style.left=Math.max(110,Math.min(wb.width-110,l))+"px"; tip.style.top=(b.top-wb.top+30)+"px"; }
+    r.addEventListener("mouseenter",show); r.addEventListener("click",show); r.addEventListener("mouseleave",function(){ tip.hidden=true; });
+  });
+}
+function loadOrg(cb){
+  if (S.O) return cb();
+  fetch("organic.json",{cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); }).then(function(o){ S.O=o; S.OERR=false; cb(); }).catch(function(){ S.OERR=true; cb(); });
+}
+function setView(v){
+  S.view=v; save(); viewsUI();
+  if (v==="org") loadOrg(function(){ status(); render(); }); else { status(); render(); }
+}
+function viewsUI(){ document.querySelectorAll("#views button").forEach(function(b){ b.setAttribute("aria-pressed",String(b.dataset.v===S.view)); }); }
 function rays(){ var s='', N=44; for (var i=0;i<N;i++){ var len=i%2?22:36; s+='<rect x="196" y="'+(8+(36-len))+'" width="8" height="'+len+'" rx="2" transform="rotate('+(i/N*360).toFixed(1)+' 200 200)"/>'; } $("rays").innerHTML=s; }
 function status(){
+  var tg=document.querySelector(".hero .tag"), bd=document.querySelector(".band span:last-child");
+  if (tg) tg.innerHTML=S.view==="org"?"Alcance, visualizações, interações e <em>seguidores novos</em> do Instagram.":"Visitas ao perfil e <em>seguidores novos</em>, praça por praça.";
+  if (bd) bd.textContent=S.view==="org"?"Crescimento orgânico · Instagram":"Campanhas · Meta Ads";
+  if (S.view==="org"){
+    if (!S.O){ $("chip").className="chip demo"; $("chip").textContent="Sem dados"; $("meta").textContent="Os números orgânicos ainda não foram gerados."; return; }
+    var o=new Date(S.O.updatedAt);
+    $("chip").className="chip live"; $("chip").textContent="Dados do Instagram";
+    $("meta").innerHTML="Atualizado em <b>"+String(o.getDate()).padStart(2,"0")+"/"+String(o.getMonth()+1).padStart(2,"0")+" às "+String(o.getHours()).padStart(2,"0")+":"+String(o.getMinutes()).padStart(2,"0")+"</b> · atualiza todo dia de manhã · o dia de hoje só entra amanhã";
+    return;
+  }
   var d=new Date(S.D.updatedAt);
   $("chip").className="chip live"; $("chip").textContent="Dados da Meta";
   $("meta").innerHTML="Atualizado em <b>"+String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" às "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+"</b> · atualiza todo dia às 7h";
@@ -458,9 +580,10 @@ function status(){
 
 /* ---------- eventos ---------- */
 function select(k,focus){ S.active=k; save(); render(); if (focus){ var b=$("tab-"+k); if (b) b.focus(); } }
+$("views").addEventListener("click",function(e){ var b=e.target.closest("button[data-v]"); if (b&&b.dataset.v!==S.view) setView(b.dataset.v); });
 $("tabs").addEventListener("click",function(e){ var b=e.target.closest(".tab"); if (b) select(b.dataset.k); });
 $("tabs").addEventListener("keydown",function(e){ if (e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return; var sc=scopes(), i=sc.findIndex(function(c){ return c.key===S.active; }); i=(i+(e.key==="ArrowRight"?1:-1)+sc.length)%sc.length; select(sc[i].key,true); e.preventDefault(); });
-$("panel").addEventListener("click",function(e){ var b=e.target.closest(".seg button"); if (b){ S.metric=b.dataset.m; render(); return; } var tr=e.target.closest("tr[data-k]"); if (tr){ select(tr.dataset.k); $("tabs").scrollIntoView({behavior:"smooth",block:"start"}); } });
+$("panel").addEventListener("click",function(e){ var om=e.target.closest("button[data-om]"); if (om){ S.ometric=om.dataset.om; render(); return; } var os=e.target.closest("button[data-os]"); if (os){ S.osort=os.dataset.os; render(); return; } var b=e.target.closest(".seg button[data-m]"); if (b){ S.metric=b.dataset.m; render(); return; } var tr=e.target.closest("tr[data-k]"); if (tr){ select(tr.dataset.k); $("tabs").scrollIntoView({behavior:"smooth",block:"start"}); } });
 $("period").addEventListener("click",function(e){ var b=e.target.closest(".pc"); if (!b) return; if (b.dataset.p==="custom"&&S.preset!=="custom"){ var r=range(); S.from=r.from; S.to=r.to; } S.preset=b.dataset.p; save(); render(); });
 $("period").addEventListener("change",function(e){
   var id=e.target.id;
@@ -474,9 +597,12 @@ var rz; window.addEventListener("resize",function(){ clearTimeout(rz); rz=setTim
 /* ---------- início ---------- */
 function start(D){
   S.D=D;
-  var st=lsGet("rn_period"); if (st){ ["preset","from","to","cmp","cfrom","cto","active"].forEach(function(k){ if (st[k]) S[k]=st[k]; }); }
+  var st=lsGet("rn_period"); if (st){ ["view","preset","from","to","cmp","cfrom","cto","active"].forEach(function(k){ if (st[k]) S[k]=st[k]; }); }
   var hs=(location.hash||"").replace("#",""); if (scopes().some(function(c){ return c.key===hs; })) S.active=hs;
   if (!scopes().some(function(c){ return c.key===S.active; })) S.active="all";
+  if (S.view!=="org") S.view="ads";
+  viewsUI();
+  if (S.view==="org"){ loadOrg(function(){ status(); render(); }); return; }
   status(); render();
 }
 rays();

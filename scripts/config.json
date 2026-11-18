@@ -5,6 +5,7 @@
     { "key": "spcap", "label": "SP Capital", "uf": "SP", "keywords": ["sp capital", "sao paulo capital"] },
     { "key": "rj", "label": "RJ Capital", "uf": "RJ", "keywords": ["rj capital", "rio de janeiro", "rj"] },
     { "key": "spint", "label": "SP Interior", "uf": "SP", "keywords": ["sp interior", "interior de sp", "interior sp"] },
-    { "key": "bsb", "label": "Brasília", "uf": "DF", "keywords": ["brasilia", "bsb", "distrito federal"] }
+    { "key": "bsb", "label": "Brasília", "uf": "DF", "keywords": ["brasilia", "bsb", "distrito federal"] },
+    { "key": "ssa", "label": "Salvador", "uf": "BA", "keywords": ["ssa", "salvador"] }
   ]
 }
